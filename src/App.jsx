@@ -8,13 +8,14 @@ import { db } from "./config/Firebase"
 import Modal from './component/Modal';
 import Updatemodal from './component/UpdateModal';
 
+
 function App() {
 
   const [contact, setContact] = useState(null);
+  const [originalContacts, setOriginalContacts] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateData, setUpdateData] = useState(null);
-  // console.log(updateData.id);
 
   //Get Contacts...
   const fetchData = async () => {
@@ -28,12 +29,13 @@ function App() {
         }
       });
       setContact(contactLists);
+      setOriginalContacts(contactLists); // Set originalContacts when fetching data
     } catch (error) {
       throw new Error("Database not working.")
     }
   };
 
-  //Delete contact...
+  // Delete contact...
 
   const handleDeleteContact = async (contactId) => {
     try {
@@ -46,11 +48,22 @@ function App() {
   }
 
   useEffect(() => {
-    setContact[fetchData()];
+    fetchData();
   }, []);
 
   const handleReloadData = () => {
     fetchData();
+  }
+
+  const onChangeSearch = (e) => {
+    const searchValue = e.target.value.toLowerCase();
+    if (searchValue === "") {
+      setContact(originalContacts); // Reset contact to originalContacts when search value is empty
+    } else {
+      setContact(
+        originalContacts.filter(data => data.name.toLowerCase().includes(searchValue))
+      )
+    }
   }
 
   return (
@@ -62,7 +75,7 @@ function App() {
         <button onClick={() => setShowModal(true)}>
           <img className='w-8 rounded-full mr-3' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk3LRnhfezH0hOYg1OuJCifddhiiXiMF5N22IwgzzwPw&s" alt="Reload" />
         </button>
-        <input className='bg-blue-200 p-1 rounded-md text-black' type="text" placeholder='Search...' />
+        <input onChange={onChangeSearch} className='bg-blue-200 p-1 rounded-md text-black' type="text" placeholder='Search...' />
         <button>
           <img className='w-8 rounded-lg ml-3' src="https://t3.ftcdn.net/jpg/04/99/34/78/360_F_499347841_IXq0bLOPN4MkKAa71nP3WMQq6LVlgeTO.jpg" alt="Reload" />
         </button>
